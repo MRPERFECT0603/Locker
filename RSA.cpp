@@ -2,72 +2,213 @@
 #include<string>
 #include<algorithm>
 #include<cmath>
-using namespace std;
+#include<numeric>
+#include<set>
+// using namespace std;
 
-bool checkPrime(int num)
+// bool checkPrime(int num)
+// {
+//     for(int i = 2; i <= sqrt(num); i++)
+//     {
+//         if(num % i == 0) 
+//         return false;
+//     }
+//     return true;
+// }
+// int minverse(int a , int t)
+// {
+//     int c = 0,k=0;
+//     while(1)
+//     {
+//         c=1+k*t;
+//         if(c % a == 0)
+//             return(c/a);
+//             k++;
+//     }
+// }
+// void encryptRSA(int p , int q , int e , int d)
+// {
+
+// }
+// void rsa()
+// {
+//     int p,q;
+//     labelp:cin>>p;
+//     bool flag;
+//     flag = checkPrime(p);
+//     if(flag==false)
+//     {
+//         cout<<"renter p";
+//         goto labelp;
+//     }
+//     labelq:cin>>q;
+//     flag = checkPrime(q);
+//     if(flag==false)
+//     {
+//         cout<<"renter q";
+//         goto labelq;
+//     }
+//     cout<<p<<q;
+//     int n = p*q;
+//     int t = (p-1)*(q-1);
+//     int k=0;
+//     int e=0,d=0;
+//     for(int i=2;i<t;i++)
+//     {
+//         if(t%i==0 || checkPrime(i)==false)
+//         continue;
+//         if(i!=p && i!=q)
+//         {
+//             e=i;
+//             flag= minverse(e,t);
+//             if(flag>0)
+//             {
+//                 d=flag;
+//                 k++;
+//             }
+//         }
+//         if(e!=0&&d!=0)
+//             break;
+//     }
+//     cout<<endl<<e<<endl<<d<<endl;
+//     encryptRSA(p,q,e,d);
+// }
+int gcd(int a, int b)
 {
-    for(int i = 2; i <= sqrt(num); i++)
-    {
-        if(num % i == 0) 
-        return false;
-    }
-    return true;
+    if (b==0)return a;
+    return gcd(b, a % b);   
 }
-int minverse(int a , int t)
+// int main()
+// {
+//     // rsa();
+//     cout<<gcd(1,3);
+//     return 0;
+// }
+
+
+
+
+
+
+// #include <bits/stdc++.h>
+using namespace std;
+set<int>
+	prime; // a set will be the collection of prime numbers,
+		// where we can select random primes p and q
+int public_key;
+int private_key;
+int n;
+// we will run the function only once to fill the set of
+// prime numbers
+void primefiller()
 {
-    int c = 0,k=0;
-    while(1)
-    {
-        c=1+k*t;
-        if(c % a == 0)
-            return(c/a);
-            k++;
-    }
+	// method used to fill the primes set is seive of
+	// eratosthenes(a method to collect prime numbers)
+	vector<bool> seive(250, true);
+	seive[0] = false;
+	seive[1] = false;
+	for (int i = 2; i < 250; i++) {
+		for (int j = i * 2; j < 250; j += i) {
+			seive[j] = false;
+		}
+	} // filling the prime numbers
+	for (int i = 0; i < seive.size(); i++) {
+		if (seive[i])
+			prime.insert(i);
+	}
 }
-void rsa()
+// picking a random prime number and erasing that prime
+// number from list because p!=q
+int pickrandomprime()
 {
-    int p,q;
-    labelp:cin>>p;
-    bool flag;
-    flag = checkPrime(p);
-    if(flag==false)
-    {
-        cout<<"renter p";
-        goto labelp;
-    }
-    labelq:cin>>q;
-    flag = checkPrime(q);
-    if(flag==false)
-    {
-        cout<<"renter q";
-        goto labelq;
-    }
-    cout<<p<<q;
-    int n = p*q;
-    int t = (p-1)*(q-1);
-    int k=0;
-    int e=0,d=0;
-    for(int i=2;i<t;i++)
-    {
-        if(t%i==0 || checkPrime(i)==false)
-        continue;
-        if(i!=p && i!=q)
-        {
-            e=i;
-            flag= minverse(e,t);
-            if(flag>0)
-            {
-                d=flag;
-                k++;
-            }
-        }
-        if(e!=0&&d!=0)
-            break;
-    }
-    cout<<e<<endl<<d<<endl;;
+	int k = rand() % prime.size();
+	auto it = prime.begin();
+	while (k--)
+		it++;
+	int ret = *it;
+	prime.erase(it);
+	return ret;
+}
+void setkeys()
+{
+	int prime1 = 89; // first prime number
+	int prime2 = 83; // second prime number
+	// to check the prime numbers selected
+	// cout<<prime1<<" "<<prime2<<endl;
+	n = prime1 * prime2;
+	int fi = (prime1 - 1) * (prime2 - 1);
+	int e = 2;
+	while (1) {
+		if (gcd(e, fi) == 1)
+			break;
+		e++;
+	} // d = (k*Φ(n) + 1) / e for some integer k
+	public_key = e;
+	int d = 2;
+	while (1) {
+		if ((d * e) % fi == 1)
+			break;
+		d++;
+	}
+	private_key = d;
+}
+// to encrypt the given number
+long long int encrypt(double message)
+{
+	int e = public_key;
+	long long int encrpyted_text = 1;
+	while (e--) {
+		encrpyted_text *= message;
+		encrpyted_text %= n;
+	}
+	return encrpyted_text;
+}
+// to decrypt the given number
+long long int decrypt(int encrpyted_text)
+{
+	int d = private_key;
+	long long int decrypted = 1;
+	while (d--) {
+		decrypted *= encrpyted_text;
+		decrypted %= n;
+	}
+	return decrypted;
+}
+// first converting each character to its ASCII value and
+// then encoding it then decoding the number to get the
+// ASCII and converting it to character
+vector<int> encoder(string message)
+{
+	vector<int> form;
+	// calling the encrypting function in encoding function
+	for (auto& letter : message)
+		form.push_back(encrypt((int)letter));
+	return form;
+}
+string decoder(vector<int> encoded)
+{
+	string s;
+	// calling the decrypting function decoding function
+	for (auto& num : encoded)
+		s += decrypt(num);
+	return s;
 }
 int main()
 {
-    rsa();
-    return 0;
+	primefiller();
+	setkeys();
+	string message = "vivek";
+	// uncomment below for manual input
+	// cout<<"enter the message\n";getline(cin,message);
+	// calling the encoding function
+	vector<int> coded = encoder(message);
+	cout << "Initial message:\n" << message;
+	cout << "\n\nThe encoded message(encrypted by public "
+			"key)\n";
+	for (auto& p : coded)
+		cout << p;
+	cout << "\n\nThe decoded message(decrypted by private "
+			"key)\n";
+	cout << decoder(coded) << endl;
+	return 0;
 }
